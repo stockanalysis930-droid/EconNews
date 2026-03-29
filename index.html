@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EconNews | AI Powered Finance Aggregator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="index.css">
+</head>
+<body>
+    <div id="app">
+        <header class="glass-nav">
+            <div class="logo">
+                <span class="logo-icon">📈</span>
+                <h1>Econ<span>News</span></h1>
+            </div>
+            
+            <nav>
+                <button class="nav-btn active" data-target="feed-view">Feed</button>
+                <button class="nav-btn" data-target="manage-view">Following</button>
+            </nav>
+        </header>
+
+        <main>
+            <!-- FEED VIEW -->
+            <section id="feed-view" class="view active">
+                <div class="view-header">
+                    <div>
+                        <h2>Latest Intelligence</h2>
+                        <p class="subtitle" id="last-updated-text" style="font-size: 0.85rem; color: var(--success);">🔴 Live: Awaiting first fetch...</p>
+                    </div>
+                    <div class="filter-group">
+                        <select id="sort-select">
+                            <option value="time">Sort: Newest First</option>
+                            <option value="stars">Sort: Highest Stars</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="ticker-tabs" class="ticker-tabs">
+                    <!-- Dynamic tabs injected here -->
+                </div>
+                
+                <div id="loading-feed" class="loading-state hidden">
+                    <div class="spinner"></div>
+                    <p>Fetching and analyzing market data...</p>
+                </div>
+
+                <div id="feed-container" class="articles-grid">
+                    <!-- Dynamic Articles Go Here -->
+                </div>
+            </section>
+
+            <!-- MANAGE TICKERS VIEW -->
+            <section id="manage-view" class="view">
+                <div class="view-header">
+                    <h2>Followed Tickers</h2>
+                    <p class="subtitle">Add stocks to track their latest news.</p>
+                </div>
+                
+                <form id="ticker-form" class="ticker-form panel">
+                    <input type="text" id="ticker-input" placeholder="e.g. AAPL, TSLA, MSFT" autocomplete="off" required>
+                    <button type="submit" id="add-ticker-btn" class="btn-primary">Follow Ticker</button>
+                </form>
+
+                <div id="tickers-list" class="tickers-grid">
+                    <!-- Dynamic Tickers Go Here -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
