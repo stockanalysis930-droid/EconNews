@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Real-time ASL Sign Language Translator using hand gesture recognition from your webcam. Translates American Sign Language alphabet gestures into text instantly.">
+    <title>ASL Sign Language Translator — Real-Time Hand Gesture Recognition</title>
+
+    <!-- Google Font: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- ========== LOADING OVERLAY ========== -->
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="loading-content">
+            <div class="loading-spinner">
+                <div class="spinner-ring"></div>
+                <div class="spinner-hand">🤟</div>
+            </div>
+            <h2 class="loading-title">Initializing Hand Tracker</h2>
+            <p class="loading-subtitle">Loading MediaPipe AI model…</p>
+            <div class="loading-progress">
+                <div class="loading-progress-bar" id="loading-progress-bar"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== ERROR MODAL ========== -->
+    <div id="error-modal" class="error-modal hidden">
+        <div class="error-modal-content">
+            <div class="error-icon">⚠️</div>
+            <h2 class="error-title" id="error-title">Camera Access Required</h2>
+            <p class="error-message" id="error-message">
+                Please allow camera access to use the Sign Language Translator.
+                Check your browser permissions and reload the page.
+            </p>
+            <button class="btn btn-primary" id="error-retry-btn">Try Again</button>
+        </div>
+    </div>
+
+    <!-- ========== MAIN APPLICATION ========== -->
+    <div id="app" class="app">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-left">
+                <div class="logo">
+                    <span class="logo-icon">🤟</span>
+                    <h1 class="logo-text">SignSpeak</h1>
+                </div>
+                <span class="badge" id="status-badge">Offline</span>
+            </div>
+            <div class="header-right">
+                <div class="fps-counter" id="fps-counter" title="Frames per second">
+                    <span class="fps-dot"></span>
+                    <span id="fps-value">0</span> FPS
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Left Column: Camera Feed -->
+            <section class="camera-section" aria-label="Camera feed">
+                <div class="camera-container" id="camera-container">
+                    <!-- Video element (hidden, used as source) -->
+                    <video id="webcam" class="camera-video" autoplay playsinline></video>
+                    <!-- Canvas overlay for hand skeleton -->
+                    <canvas id="overlay-canvas" class="camera-overlay"></canvas>
+                    <!-- No-camera placeholder -->
+                    <div class="camera-placeholder" id="camera-placeholder">
+                        <div class="placeholder-icon">📷</div>
+                        <p>Click <strong>Start Camera</strong> to begin</p>
+                    </div>
+                    <!-- Hand detection indicator -->
+                    <div class="detection-indicator hidden" id="detection-indicator">
+                        <span class="detection-dot"></span>
+                        Hand Detected
+                    </div>
+                </div>
+
+                <!-- Control Bar -->
+                <div class="control-bar">
+                    <button class="btn btn-primary btn-lg" id="toggle-camera-btn">
+                        <span class="btn-icon" id="camera-btn-icon">▶</span>
+                        <span id="camera-btn-text">Start Camera</span>
+                    </button>
+                    <button class="btn btn-secondary" id="clear-text-btn" title="Clear translated text">
+                        <span class="btn-icon">🗑️</span>
+                        Clear
+                    </button>
+                    <button class="btn btn-secondary" id="backspace-btn" title="Delete last character">
+                        <span class="btn-icon">⌫</span>
+                    </button>
+                    <button class="btn btn-secondary" id="space-btn" title="Add space">
+                        <span class="btn-icon">␣</span>
+                        Space
+                    </button>
+                    <button class="btn btn-accent" id="speak-btn" title="Speak translated text">
+                        <span class="btn-icon">🔊</span>
+                        Speak
+                    </button>
+                </div>
+            </section>
+
+            <!-- Right Column: Translation Panel -->
+            <section class="translation-section" aria-label="Translation output">
+                <!-- Current Detection Card -->
+                <div class="card detection-card">
+                    <div class="card-header">
+                        <h2 class="card-title">Detected Sign</h2>
+                        <div class="detection-meta">
+                            <span class="category-badge" id="category-badge">—</span>
+                            <span class="detection-hand-label" id="hand-label">—</span>
+                        </div>
+                    </div>
+                    <div class="detected-letter-container">
+                        <div class="detected-emoji" id="detected-emoji"></div>
+                        <div class="detected-letter" id="detected-letter">?</div>
+                        <div class="letter-glow" id="letter-glow"></div>
+                    </div>
+                    <div class="confidence-section">
+                        <div class="confidence-header">
+                            <span class="confidence-label">Confidence</span>
+                            <span class="confidence-value" id="confidence-value">0%</span>
+                        </div>
+                        <div class="confidence-bar">
+                            <div class="confidence-bar-fill" id="confidence-bar-fill"></div>
+                        </div>
+                    </div>
+                    <!-- Top alternative matches -->
+                    <div class="top-results" id="top-results">
+                        <!-- Populated by app.js -->
+                    </div>
+                </div>
+
+                <!-- Sentence Builder Card -->
+                <div class="card sentence-card">
+                    <div class="card-header">
+                        <h2 class="card-title">Translated Text</h2>
+                        <span class="letter-count" id="letter-count">0 chars</span>
+                    </div>
+                    <div class="sentence-display" id="sentence-display">
+                        <span class="sentence-text" id="sentence-text"></span>
+                        <span class="sentence-cursor">|</span>
+                    </div>
+                </div>
+
+                <!-- ASL Gesture Guide (tabbed) -->
+                <div class="card reference-card">
+                    <div class="card-header">
+                        <h2 class="card-title">Gesture Guide</h2>
+                        <button class="btn btn-ghost btn-sm" id="toggle-guide-btn">Show</button>
+                    </div>
+                    <div class="guide-content hidden" id="guide-content">
+                        <div class="category-tabs" id="category-tabs">
+                            <button class="cat-tab active" data-cat="all">All</button>
+                            <button class="cat-tab" data-cat="letter">Letters</button>
+                            <button class="cat-tab" data-cat="number">Numbers</button>
+                            <button class="cat-tab" data-cat="word">Words</button>
+                            <button class="cat-tab" data-cat="phrase">Phrases</button>
+                        </div>
+                        <div class="reference-grid" id="reference-grid">
+                            <!-- Populated dynamically in app.js -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Keyboard Shortcuts -->
+                <div class="shortcuts-bar">
+                    <span class="shortcut"><kbd>Space</kbd> Toggle Camera</span>
+                    <span class="shortcut"><kbd>Backspace</kbd> Delete</span>
+                    <span class="shortcut"><kbd>Esc</kbd> Clear</span>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Load application as ES modules -->
+    <script type="module" src="app.js"></script>
+</body>
+</html>

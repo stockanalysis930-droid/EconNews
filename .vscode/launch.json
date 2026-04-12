@@ -2,13 +2,13 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Launch Chrome (EconNews)",
+            "name": "Launch Chrome (Sign Speak)",
             "type": "chrome",
             "request": "launch",
             "file": "${workspaceFolder}/index.html"
         },
         {
-            "name": "Launch Edge (EconNews)",
+            "name": "Launch Edge (Sign Speak)",
             "type": "msedge",
             "request": "launch",
             "file": "${workspaceFolder}/index.html"
